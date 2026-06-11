@@ -34,6 +34,16 @@ export default function ScrollingText({
   const lastTimeRef = useRef<number>(0)
   const speedRef = useRef(speed)
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [topPad, setTopPad] = useState(0)
+
+  // Measure container so first line starts at vertical centre
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const obs = new ResizeObserver(() => setTopPad(Math.floor(el.clientHeight / 2)))
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
   // Keep speedRef in sync without restarting RAF
   useEffect(() => {
@@ -55,8 +65,8 @@ export default function ScrollingText({
       const delta = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1) // cap delta
       lastTimeRef.current = timestamp
 
-      // Speed 50 ≈ 40 px/sec → speed * 0.8 px/sec
-      const pxPerSec = speedRef.current * 0.8
+      // Speed 1 → 1 px/sec, Speed 50 → 10 px/sec, Speed 100 → 20 px/sec
+      const pxPerSec = Math.max(1, speedRef.current * 0.2)
       container.scrollTop += pxPerSec * delta
 
       if (
@@ -108,8 +118,8 @@ export default function ScrollingText({
       {/* Scrollable text */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-5 pt-4"
-        style={{ paddingBottom: '160px', scrollBehavior: 'auto' }}
+        className="flex-1 overflow-y-auto px-5"
+        style={{ paddingTop: topPad, paddingBottom: '160px', scrollBehavior: 'auto' }}
       >
         <div className="reading-text max-w-2xl mx-auto text-text-primary">
           {sentences.map((sentence, i) => (
