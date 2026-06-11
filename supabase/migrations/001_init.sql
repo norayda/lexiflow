@@ -77,13 +77,13 @@ create policy "daily_texts_select_authenticated"
   on daily_texts for select
   using (auth.role() = 'authenticated');
 
-create policy "daily_texts_insert_service"
+create policy "daily_texts_insert"
   on daily_texts for insert
-  with check (auth.role() = 'service_role');
+  with check (true);
 
-create policy "daily_texts_update_service"
+create policy "daily_texts_update"
   on daily_texts for update
-  using (auth.role() = 'service_role');
+  using (true);
 
 -- reading_progress: owner only
 create policy "reading_progress_all_own"
