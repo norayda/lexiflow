@@ -13,6 +13,10 @@ on:
         description: 'Mois à générer (YYYY-MM). Laisser vide = mois suivant.'
         required: false
         default: ''
+      dry_run:
+        description: 'true = test Supabase sans appeler Claude (pas de crédits consommés).'
+        required: false
+        default: 'false'
 
 jobs:
   generate:
@@ -38,4 +42,5 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
           TARGET_MONTH:        ${{ github.event.inputs.target_month }}
+          DRY_RUN:             ${{ github.event.inputs.dry_run }}
         run: node scripts/generate-texts.js
