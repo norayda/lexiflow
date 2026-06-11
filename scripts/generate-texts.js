@@ -34,10 +34,22 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 // ── Compute next month's dates ────────────────────────────────────────────────
 
+// TARGET_MONTH=YYYY-MM targets a specific month; default = next month
 const now = new Date()
-const nextMonthFirst = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-const year  = nextMonthFirst.getFullYear()
-const month = nextMonthFirst.getMonth()          // 0-indexed
+let targetFirst
+if (process.env.TARGET_MONTH) {
+  const [y, m] = process.env.TARGET_MONTH.split('-').map(Number)
+  if (!y || !m || m < 1 || m > 12) {
+    console.error('Erreur : TARGET_MONTH doit être au format YYYY-MM (ex: 2026-06)')
+    process.exit(1)
+  }
+  targetFirst = new Date(y, m - 1, 1)
+} else {
+  targetFirst = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+}
+const nextMonthFirst = targetFirst
+const year  = targetFirst.getFullYear()
+const month = targetFirst.getMonth()             // 0-indexed
 const daysInMonth = new Date(year, month + 1, 0).getDate()
 
 const dates = Array.from({ length: daysInMonth }, (_, i) => {
