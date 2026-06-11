@@ -72,10 +72,18 @@ create policy "profiles_update_own"
   on profiles for update
   using (auth.uid() = id);
 
--- daily_texts: readable by any authenticated user
+-- daily_texts: readable by any authenticated user, writable by service_role only
 create policy "daily_texts_select_authenticated"
   on daily_texts for select
   using (auth.role() = 'authenticated');
+
+create policy "daily_texts_insert_service"
+  on daily_texts for insert
+  with check (auth.role() = 'service_role');
+
+create policy "daily_texts_update_service"
+  on daily_texts for update
+  using (auth.role() = 'service_role');
 
 -- reading_progress: owner only
 create policy "reading_progress_all_own"
