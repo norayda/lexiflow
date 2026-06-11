@@ -34,6 +34,7 @@ export default function ScrollingText({
   const lastTimeRef = useRef<number>(0)
   const speedRef = useRef(speed)
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const scrollPosRef = useRef(0)   // float accumulator — avoids integer rounding on iOS
 
   // Keep speedRef in sync without restarting RAF
   useEffect(() => {
@@ -51,16 +52,20 @@ export default function ScrollingText({
       const container = containerRef.current
       if (!container) return
 
-      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp
-      const delta = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1) // cap delta
+      if (lastTimeRef.current === 0) {
+        lastTimeRef.current = timestamp
+        scrollPosRef.current = container.scrollTop  // sync float pos on first frame
+      }
+      const delta = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1)
       lastTimeRef.current = timestamp
 
       // Speed 1 → 2 px/sec, Speed 50 → 22 px/sec, Speed 100 → 42 px/sec
       const pxPerSec = 2 + (speedRef.current - 1) * 0.4
-      container.scrollTop += pxPerSec * delta
+      scrollPosRef.current += pxPerSec * delta   // accumulate as float — never read scrollTop back
+      container.scrollTop = scrollPosRef.current
 
       if (
-        container.scrollTop + container.clientHeight >=
+        scrollPosRef.current + container.clientHeight >=
         container.scrollHeight - 20
       ) {
         setIsPlaying(false)
@@ -89,6 +94,7 @@ export default function ScrollingText({
 
   const handleReset = () => {
     setIsPlaying(false)
+    scrollPosRef.current = 0
     if (containerRef.current) containerRef.current.scrollTop = 0
   }
 

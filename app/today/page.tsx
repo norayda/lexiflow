@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import Link from 'next/link'
 import ScrollingText from '@/components/ScrollingText'
 import ThemeToggle from '@/components/ThemeToggle'
 import type { DailyText, Profile, Language } from '@/types'
@@ -18,6 +19,7 @@ export default function TodayPage() {
   const [nextDate, setNextDate] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showTranslation, setShowTranslation] = useState(false)
+  const [completed, setCompleted] = useState(false)
   const router = useRouter()
 
   const today = toDateStr(new Date())
@@ -43,11 +45,17 @@ export default function TodayPage() {
 
       if (textData) {
         setDailyText(textData)
-        // Ensure reading_progress row exists
         await supabase.from('reading_progress').upsert(
           { user_id: user.id, text_id: textData.id, completed: false },
           { onConflict: 'user_id,text_id', ignoreDuplicates: true },
         )
+        const { data: existing } = await supabase
+          .from('reading_progress')
+          .select('completed')
+          .eq('user_id', user.id)
+          .eq('text_id', textData.id)
+          .single()
+        if (existing?.completed) setCompleted(true)
       } else {
         const { data: next } = await supabase
           .from('daily_texts')
@@ -72,6 +80,7 @@ export default function TodayPage() {
       .update({ completed: true })
       .eq('user_id', user.id)
       .eq('text_id', dailyText.id)
+    setCompleted(true)
   }
 
   if (authLoading || loading) {
@@ -111,6 +120,27 @@ export default function TodayPage() {
     day: 'numeric',
     month: 'long',
   })
+
+  if (completed) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center pb-24 page-fade">
+        <p className="text-6xl mb-5">🎉</p>
+        <h2 className="text-2xl font-light text-text-primary mb-2">Bravo !</h2>
+        <p className="text-text-secondary mb-8 leading-relaxed">
+          Tu as terminé le texte du jour.<br />
+          Reviens demain pour continuer.
+        </p>
+        <p className="text-4xl mb-8">🌙</p>
+        <Link
+          href="/calendar"
+          className="px-6 py-3 rounded-2xl bg-surface border border-surface-raised
+                     text-text-secondary text-sm hover:text-text-primary transition-colors"
+        >
+          Voir ma progression →
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col bg-background" style={{ height: '100dvh' }}>
