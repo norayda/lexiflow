@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme tokens (RGB tuples – space-separated for CSS color-level-4) ───── */
+
+:root,
+:root[data-theme="dark"] {
+  --rgb-background:     15  15  26;   /* #0f0f1a */
+  --rgb-surface:        26  26  46;   /* #1a1a2e */
+  --rgb-surface-raised: 37  37  64;   /* #252540 */
+  --rgb-text-primary:  232 232 240;   /* #e8e8f0 */
+  --rgb-text-secondary:144 144 168;   /* #9090a8 */
+}
+
+/* Beige / light theme */
+:root[data-theme="light"] {
+  --rgb-background:    247 243 237;   /* #f7f3ed */
+  --rgb-surface:       238 232 223;   /* #eee8df */
+  --rgb-surface-raised:228 221 210;   /* #e4ddd2 */
+  --rgb-text-primary:   30  26  22;   /* #1e1a16 */
+  --rgb-text-secondary:107  97  88;   /* #6b6158 */
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: rgb(var(--rgb-background));
+  color: rgb(var(--rgb-text-primary));
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+/* ── Reading text ─────────────────────────────────────────────────────────── */
+
+.reading-text {
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 2;
+}
+
+/* Light theme: slightly warmer tint for long-form reading */
+:root[data-theme="light"] .reading-text {
+  color: #2a2218;  /* warm dark brown, easier on the eyes */
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-fade { animation: fadeIn 200ms ease-out; }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.slide-up { animation: slideUp 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0  0 rgba(108, 99, 255, 0.5); }
+  50%       { box-shadow: 0 0 0 14px rgba(108, 99, 255, 0); }
+}
+.pulse-active { animation: pulseGlow 1.5s ease-in-out infinite; }
+
+/* ── Form controls ────────────────────────────────────────────────────────── */
+
+input[type='range'] { accent-color: #6c63ff; }
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar       { width: 3px; }
+::-webkit-scrollbar-track { background: rgb(var(--rgb-surface)); }
+::-webkit-scrollbar-thumb { background: #6c63ff; border-radius: 3px; }
+
+/* ── iOS safe area ────────────────────────────────────────────────────────── */
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top:    env(safe-area-inset-top,    0px); }
