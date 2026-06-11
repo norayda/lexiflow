@@ -6,6 +6,7 @@ import type { Language, DailyText } from '@/types'
 interface ScrollingTextProps {
   text: string
   language: Language
+  nativeLang: Language
   defaultSpeed: number
   textId: string
   dailyText: DailyText
@@ -16,6 +17,7 @@ interface ScrollingTextProps {
 export default function ScrollingText({
   text,
   language,
+  nativeLang,
   defaultSpeed,
   textId,
   dailyText,
@@ -190,6 +192,7 @@ export default function ScrollingText({
         <PopupPhrase
           phrase={selectedPhrase}
           language={language}
+          nativeLang={nativeLang}
           textId={textId}
           dailyText={dailyText}
           userId={userId}

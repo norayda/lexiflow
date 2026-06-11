@@ -118,6 +118,7 @@ export default function ReadDatePage() {
         <ScrollingText
           text={dailyText[contentKey] as string}
           language={lang}
+          nativeLang={nativeLang}
           defaultSpeed={profile?.scroll_speed ?? 50}
           textId={dailyText.id}
           dailyText={dailyText}

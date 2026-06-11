@@ -17,11 +17,22 @@ export default function CalendarPage() {
   const [days, setDays] = useState<CalendarDay[]>([])
   const [loading, setLoading] = useState(true)
   const [viewDate, setViewDate] = useState(new Date())
+  const [hasLang, setHasLang] = useState<boolean | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     if (!authLoading && !user) router.replace('/auth')
   }, [user, authLoading, router])
+
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('profiles')
+      .select('learning_language')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => setHasLang(!!data?.learning_language))
+  }, [user])
 
   useEffect(() => {
     if (!user) return
@@ -84,7 +95,7 @@ export default function CalendarPage() {
   const nextMonth = () =>
     setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
 
-  if (authLoading) {
+  if (authLoading || hasLang === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -195,6 +206,30 @@ export default function CalendarPage() {
           Indisponible
         </span>
       </div>
+
+      {/* Guard — no learning language set */}
+      {!hasLang && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative w-full max-w-md bg-surface rounded-t-3xl px-6 pt-8 pb-10 slide-up text-center">
+            <p className="text-4xl mb-4">🌍</p>
+            <h2 className="text-xl font-medium text-text-primary mb-2">
+              Choisis une langue à apprendre
+            </h2>
+            <p className="text-text-secondary text-sm mb-7 leading-relaxed">
+              Pour accéder au calendrier et suivre ta progression, sélectionne d&apos;abord
+              une langue dans tes paramètres.
+            </p>
+            <button
+              onClick={() => router.push('/profile')}
+              className="w-full py-3.5 bg-accent text-white rounded-2xl font-medium
+                         hover:bg-accent-light transition-colors active:scale-95"
+            >
+              Aller aux paramètres
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

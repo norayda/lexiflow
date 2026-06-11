@@ -7,15 +7,35 @@ import type { Language, DailyText } from '@/types'
 interface PopupPhraseProps {
   phrase: string
   language: Language
+  nativeLang: Language
   textId: string
   dailyText: DailyText
   userId: string
   onClose: () => void
 }
 
+const LANG_LABELS: Record<Language, string> = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' }
+
+function splitSentences(text: string): string[] {
+  return text.split(/\.\s+/).map(s => s.trim()).filter(Boolean)
+}
+
+function findTranslation(phrase: string, dailyText: DailyText, srcLang: Language, nativeLang: Language): string | null {
+  const srcText  = dailyText[`content_${srcLang}`    as keyof DailyText] as string
+  const natText  = dailyText[`content_${nativeLang}` as keyof DailyText] as string
+  if (!srcText || !natText) return null
+
+  const srcSentences = splitSentences(srcText)
+  const natSentences = splitSentences(natText)
+  const idx = srcSentences.findIndex(s => phrase.trim().startsWith(s.substring(0, 30)))
+  if (idx === -1 || idx >= natSentences.length) return null
+  return natSentences[idx]
+}
+
 export default function PopupPhrase({
   phrase,
   language,
+  nativeLang,
   textId,
   dailyText,
   userId,
@@ -26,6 +46,7 @@ export default function PopupPhrase({
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const words = phrase.split(/\s+/).filter(Boolean)
+  const translation = findTranslation(phrase, dailyText, language, nativeLang)
 
   const handleWordPressStart = (word: string) => {
     longPressRef.current = setTimeout(() => {
@@ -65,6 +86,19 @@ export default function PopupPhrase({
               🔊
             </button>
           </div>
+
+          {translation && (
+            <div className="flex items-start gap-2 bg-surface-raised rounded-xl px-3 py-2 mb-3">
+              <span className="text-sm shrink-0">{LANG_LABELS[nativeLang]}</span>
+              <p className="text-text-secondary text-sm leading-relaxed italic">{translation}</p>
+              <button
+                onClick={() => speak(translation, nativeLang)}
+                className="shrink-0 text-accent hover:text-accent-light text-sm transition-colors"
+              >
+                🔊
+              </button>
+            </div>
+          )}
 
           <p className="text-xs text-text-secondary mb-3">
             Maintien long sur un mot pour l&apos;explorer
