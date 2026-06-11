@@ -6,8 +6,13 @@ on:
   schedule:
     - cron: '0 2 28 * *'
 
-  # Manual trigger — useful to test or regenerate a month.
+  # Manual trigger — useful to test or regenerate a specific month.
   workflow_dispatch:
+    inputs:
+      target_month:
+        description: 'Mois à générer (YYYY-MM). Laisser vide = mois suivant.'
+        required: false
+        default: ''
 
 jobs:
   generate:
@@ -32,4 +37,5 @@ jobs:
           SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
+          TARGET_MONTH:        ${{ github.event.inputs.target_month }}
         run: node scripts/generate-texts.js
