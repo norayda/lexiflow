@@ -7,6 +7,7 @@ import type { Language, DailyText } from '@/types'
 interface PopupMotProps {
   word: string
   language: Language
+  nativeLang: Language
   contextSentence: string
   textId: string
   dailyText: DailyText
@@ -15,11 +16,11 @@ interface PopupMotProps {
 }
 
 const LANG_FLAGS: Record<Language, string> = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' }
-const LANG_LABELS: Record<Language, string> = { fr: '🇫🇷 FR', en: '🇬🇧 EN', es: '🇪🇸 ES' }
 
 export default function PopupMot({
   word,
   language,
+  nativeLang,
   contextSentence,
   textId,
   dailyText,
@@ -38,22 +39,38 @@ export default function PopupMot({
   const startRef = useRef({ x: 0, y: 0 })
   const boxRef = useRef<HTMLDivElement>(null)
 
-  const langs: Language[] = ['fr', 'en', 'es']
-
   const handleSave = async () => {
     if (saved || saving) return
     setSaving(true)
     setSaveError(false)
+
+    // Fetch definition + translation (3 s timeout)
+    let combined: string | null = null
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 3000)
+      const res = await fetch('/api/define', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, language, nativeLang }),
+        signal: controller.signal,
+      })
+      clearTimeout(timer)
+      const data = await res.json()
+      combined = data.combined ?? null
+    } catch {}
+
     const { error } = await supabase.from('vocabulary_box').insert({
       user_id: userId,
       text_id: textId,
       word,
       language,
       context_sentence: contextSentence,
-      translation_fr: null,
-      translation_en: null,
-      translation_es: null,
+      translation_fr: nativeLang === 'fr' ? combined : null,
+      translation_en: nativeLang === 'en' ? combined : null,
+      translation_es: nativeLang === 'es' ? combined : null,
     })
+
     if (error) {
       setSaveError(true)
     } else {
@@ -62,7 +79,7 @@ export default function PopupMot({
     setSaving(false)
   }
 
-  // ── Drag handlers ─────────────────────────────────────────────────────────────
+  // ── Drag handlers ──────────────────────────────────────────────────────────
 
   const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
     if (saved) return
@@ -81,7 +98,7 @@ export default function PopupMot({
       const r = boxRef.current.getBoundingClientRect()
       setOverBox(
         e.clientX >= r.left && e.clientX <= r.right &&
-        e.clientY >= r.top  && e.clientY <= r.bottom
+        e.clientY >= r.top  && e.clientY <= r.bottom,
       )
     }
   }
@@ -135,9 +152,7 @@ export default function PopupMot({
             >
               {word}
             </span>
-            {!saved && (
-              <span className="text-text-secondary text-xs ml-1">↕</span>
-            )}
+            {!saved && <span className="text-text-secondary text-xs ml-1">↕</span>}
             {saved && <span className="text-success text-sm">✓</span>}
           </div>
 
@@ -150,10 +165,13 @@ export default function PopupMot({
           </button>
         </div>
 
-        {!saved && !dragging && (
+        {!saved && !saving && !dragging && (
           <p className="text-xs text-text-secondary mb-4">
             Glisse le mot vers la box ci-dessous pour l&apos;ajouter
           </p>
+        )}
+        {saving && (
+          <p className="text-xs text-accent mb-4">Recherche de la définition…</p>
         )}
         {dragging && (
           <p className="text-xs text-accent mb-4">
@@ -161,7 +179,7 @@ export default function PopupMot({
           </p>
         )}
         {saved && (
-          <p className="text-xs text-success mb-4">Mot ajouté à ta Vocabulary Box !</p>
+          <p className="text-xs text-success mb-4">Mot ajouté avec sa définition !</p>
         )}
         {saveError && (
           <p className="text-xs text-red-400 mb-4">Erreur — réessaie</p>
@@ -171,26 +189,6 @@ export default function PopupMot({
         <p className="text-text-secondary italic text-sm mb-4 leading-relaxed">
           &ldquo;{contextSentence}&rdquo;
         </p>
-
-        {/* Other language previews */}
-        <div className="space-y-2 mb-4">
-          {langs.map((l) => {
-            const content = dailyText[`content_${l}` as keyof DailyText] as string
-            if (l === language || !content) return null
-            return (
-              <div key={l} className="flex items-center gap-3 px-3 py-2 bg-surface-raised rounded-xl">
-                <span className="text-xs font-medium text-text-secondary shrink-0">{LANG_LABELS[l]}</span>
-                <p className="flex-1 text-xs text-text-primary truncate">{content.slice(0, 60)}…</p>
-                <button
-                  onClick={() => speak(content.slice(0, 200), l)}
-                  className="text-accent hover:text-accent-light transition-colors shrink-0"
-                >
-                  🔊
-                </button>
-              </div>
-            )
-          })}
-        </div>
 
         {/* Drop zone */}
         <div
@@ -206,13 +204,10 @@ export default function PopupMot({
         >
           <span className="text-xl">{saved ? '✅' : '🗃️'}</span>
           <span className={`text-sm font-medium ${overBox ? 'text-accent' : 'text-text-secondary'}`}>
-            {saved
-              ? 'Ajouté !'
-              : `Vocabulary Box ${LANG_FLAGS[language]}`}
+            {saved ? 'Ajouté !' : `Vocabulary Box ${LANG_FLAGS[language]}`}
           </span>
         </div>
 
-        {/* Close */}
         <button
           onClick={onClose}
           className="w-full py-2.5 rounded-2xl bg-surface-raised text-text-secondary

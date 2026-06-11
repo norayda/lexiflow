@@ -135,6 +135,7 @@ export default function PopupPhrase({
         <PopupMot
           word={selectedWord}
           language={language}
+          nativeLang={nativeLang}
           contextSentence={phrase}
           textId={textId}
           dailyText={dailyText}
