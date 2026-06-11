@@ -114,7 +114,6 @@ export default function PopupPhrase({
                 style={{ fontFamily: 'Georgia, serif', fontSize: '1rem' }}
                 onPointerDown={() => handleWordPressStart(word)}
                 onPointerUp={handleWordPressEnd}
-                onPointerLeave={handleWordPressEnd}
                 onPointerCancel={handleWordPressEnd}
               >
                 {word}

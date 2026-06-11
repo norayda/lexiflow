@@ -28,12 +28,14 @@ export default function PopupMot({
   const { speak } = useSpeech()
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
 
   const langs: Language[] = ['fr', 'en', 'es']
 
   const handleSave = async () => {
     setSaving(true)
-    await supabase.from('vocabulary_box').insert({
+    setSaveError(false)
+    const { error } = await supabase.from('vocabulary_box').insert({
       user_id: userId,
       text_id: textId,
       word,
@@ -43,7 +45,11 @@ export default function PopupMot({
       translation_en: null,
       translation_es: null,
     })
-    setSaved(true)
+    if (error) {
+      setSaveError(true)
+    } else {
+      setSaved(true)
+    }
     setSaving(false)
   }
 
@@ -112,10 +118,12 @@ export default function PopupMot({
             className={`flex-1 py-3 rounded-2xl font-medium text-sm transition-all active:scale-95 ${
               saved
                 ? 'bg-success/20 text-success border border-success/30'
+                : saveError
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                 : 'bg-accent text-white hover:bg-accent-light'
             } disabled:opacity-60`}
           >
-            {saved ? '✓ Ajouté !' : saving ? '…' : '＋ Ajouter à ma Vocabulary Box'}
+            {saved ? '✓ Ajouté !' : saving ? '…' : saveError ? 'Erreur — réessayer' : '＋ Ajouter à ma Vocabulary Box'}
           </button>
           <button
             onClick={onClose}
