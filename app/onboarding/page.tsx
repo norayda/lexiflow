@@ -88,6 +88,7 @@ export default function OnboardingPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm page-fade">
         {/* Step dots */}
@@ -224,5 +225,6 @@ export default function OnboardingPage() {
     {showEmailPopup && (
       <EmailConfirmPopup onContinue={() => router.replace('/today')} />
     )}
+    </>
   )
 }
