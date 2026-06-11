@@ -9,7 +9,7 @@
  * Required env vars:
  *   SUPABASE_URL       — Supabase project URL
  *   SUPABASE_SERVICE_KEY — service_role key (not anon)
- *   GEMINI_API_KEY     — Google AI Studio key
+ *   ANTHROPIC_API_KEY  — Anthropic API key
  *
  * Usage: node scripts/generate-texts.js
  */
@@ -20,12 +20,12 @@ const { createClient } = require('@supabase/supabase-js')
 
 const SUPABASE_URL       = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
-const GEMINI_API_KEY     = process.env.GEMINI_API_KEY
+const ANTHROPIC_API_KEY  = process.env.ANTHROPIC_API_KEY
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !GEMINI_API_KEY) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !ANTHROPIC_API_KEY) {
   console.error(
     'Erreur : variables d\'environnement manquantes.\n' +
-    'Requis : SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY'
+    'Requis : SUPABASE_URL, SUPABASE_SERVICE_KEY, ANTHROPIC_API_KEY'
   )
   process.exit(1)
 }
@@ -119,38 +119,33 @@ function buildUserPrompt(date, theme, index, total) {
   )
 }
 
-// ── Gemini API ────────────────────────────────────────────────────────────────
+// ── Anthropic API ─────────────────────────────────────────────────────────────
 
-async function callGemini(userPrompt) {
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent` +
-    `?key=${GEMINI_API_KEY}`
-
-  const body = {
-    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-    generationConfig: {
-      temperature: 0.9,
-      topP: 0.95,
-      maxOutputTokens: 1200,
-      responseMimeType: 'application/json',
-    },
-  }
-
-  const res = await fetch(url, {
+async function callClaude(userPrompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    headers: {
+      'content-type':    'application/json',
+      'x-api-key':       ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model:      'claude-haiku-4-5-20251001',
+      max_tokens: 1200,
+      temperature: 0.9,
+      system:     SYSTEM_PROMPT,
+      messages:   [{ role: 'user', content: userPrompt }],
+    }),
   })
 
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`Gemini ${res.status}: ${text.slice(0, 200)}`)
+    throw new Error(`Claude ${res.status}: ${text.slice(0, 200)}`)
   }
 
   const data = await res.json()
-  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!raw) throw new Error('Réponse Gemini vide ou malformée')
+  const raw = data?.content?.[0]?.text
+  if (!raw) throw new Error('Réponse Claude vide ou malformée')
   return raw
 }
 
@@ -192,7 +187,7 @@ async function main() {
     const theme = THEMES[(themeOffset + i) % THEMES.length]
 
     try {
-      const raw     = await callGemini(buildUserPrompt(date, theme, i, dates.length))
+      const raw     = await callClaude(buildUserPrompt(date, theme, i, dates.length))
       const jsonStr = extractJSON(raw)
       const payload = JSON.parse(jsonStr)
 
