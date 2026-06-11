@@ -185,13 +185,14 @@ async function main() {
   console.log(`\nLexiFlow — génération des textes pour ${monthLabel}`)
   console.log(`${dates.length} textes à générer (${dates[0]} → ${dates[dates.length - 1]})\n`)
 
-  const themeOffset = month % THEMES.length
+  // Shuffle themes and pick one per day — no repetition within a month
+  const shuffled = [...THEMES].sort(() => Math.random() - 0.5)
   let success = 0
   let failure = 0
 
   for (let i = 0; i < dates.length; i++) {
     const date  = dates[i]
-    const theme = THEMES[(themeOffset + i) % THEMES.length]
+    const theme = shuffled[i % shuffled.length]
 
     try {
       let payload
