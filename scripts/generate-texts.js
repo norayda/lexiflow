@@ -14,7 +14,7 @@
  * Usage: node scripts/generate-texts.js
  */
 
-const { createClient } = require('@supabase/supabase-js')
+// No Supabase SDK — direct PostgREST calls guarantee service_role is honoured
 
 // ── Env validation ────────────────────────────────────────────────────────────
 
@@ -30,13 +30,12 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !ANTHROPIC_API_KEY) {
   process.exit(1)
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-    detectSessionInUrl: false,
-  },
-})
+// HTTP headers reused for every PostgREST call — bypasses SDK auth management entirely
+const SUPABASE_HEADERS = {
+  'apikey':        SUPABASE_SERVICE_KEY,
+  'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+  'Content-Type':  'application/json',
+}
 
 // ── Compute next month's dates ────────────────────────────────────────────────
 
@@ -201,11 +200,15 @@ async function main() {
       payload.text_date  = date
       payload.word_count = (payload.content_fr || '').split(/\s+/).filter(Boolean).length
 
-      const { error } = await supabase
-        .from('daily_texts')
-        .upsert(payload, { onConflict: 'text_date' })
-
-      if (error) throw new Error(error.message)
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_texts`, {
+        method: 'POST',
+        headers: { ...SUPABASE_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(`Supabase ${res.status}: ${text.slice(0, 200)}`)
+      }
 
       console.log(`✓ ${date} — ${theme}`)
       success++
