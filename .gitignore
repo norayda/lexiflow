@@ -36,8 +36,7 @@ next-env.d.ts
 # Claude Code local settings
 .claude/
 
-# PWA generated files
-public/sw.js
+# PWA generated files (workbox auto-generated — sw.js is now hand-written)
 public/workbox-*.js
 public/worker-*.js
 public/sw.js.map

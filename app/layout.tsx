@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import BottomNav from '@/components/BottomNav'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import NotificationManager from '@/components/NotificationManager'
 
 export const metadata: Metadata = {
   title: 'LexiFlow',
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <BottomNav />
+          <NotificationManager />
         </ThemeProvider>
       </body>
     </html>

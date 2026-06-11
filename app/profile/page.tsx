@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/contexts/ThemeContext'
+import { requestNotifPermission, registerSW } from '@/components/NotificationManager'
 import type { Profile, Language } from '@/types'
 
 const LANGUAGES: { code: Language; label: string; flag: string }[] = [
@@ -21,7 +22,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | 'unsupported'>('unsupported')
   const router = useRouter()
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotifPerm(Notification.permission)
+      registerSW()
+    }
+  }, [])
 
   useEffect(() => {
     if (!authLoading && !user) router.replace('/auth')
@@ -182,6 +191,38 @@ export default function ProfilePage() {
                        border border-surface-raised focus:border-accent focus:outline-none"
           />
         </div>
+
+        {/* Rappels push */}
+        {notifPerm !== 'unsupported' && (
+          <div>
+            <label className="block text-text-secondary text-xs uppercase tracking-wider mb-2">
+              Rappels
+            </label>
+            {notifPerm === 'granted' ? (
+              <div className="flex items-center gap-3 px-4 py-3 bg-surface rounded-2xl
+                              border border-surface-raised text-sm text-text-secondary">
+                <span className="text-accent">✓</span>
+                <span>Rappels activés — tu reçois une notification à chaque ouverture du jour.</span>
+              </div>
+            ) : notifPerm === 'denied' ? (
+              <div className="px-4 py-3 bg-surface rounded-2xl border border-surface-raised
+                              text-sm text-text-secondary">
+                Rappels bloqués. Active-les dans Réglages → LexiFlow → Notifications.
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  const perm = await requestNotifPermission()
+                  setNotifPerm(perm)
+                }}
+                className="w-full py-3 rounded-2xl border-2 border-accent/40 text-accent
+                           text-sm hover:bg-accent/10 transition-all active:scale-95"
+              >
+                Activer les rappels quotidiens
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Theme */}
         <div>
