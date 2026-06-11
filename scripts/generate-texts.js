@@ -22,7 +22,9 @@ const SUPABASE_URL       = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
 const ANTHROPIC_API_KEY  = process.env.ANTHROPIC_API_KEY
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !ANTHROPIC_API_KEY) {
+const DRY_RUN = process.env.DRY_RUN === 'true'
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || (!ANTHROPIC_API_KEY && !DRY_RUN)) {
   console.error(
     'Erreur : variables d\'environnement manquantes.\n' +
     'Requis : SUPABASE_URL, SUPABASE_SERVICE_KEY, ANTHROPIC_API_KEY'
@@ -192,13 +194,23 @@ async function main() {
     const theme = THEMES[(themeOffset + i) % THEMES.length]
 
     try {
-      const raw     = await callClaude(buildUserPrompt(date, theme, i, dates.length))
-      const jsonStr = extractJSON(raw)
-      const payload = JSON.parse(jsonStr)
-
-      // Enforce correct date and compute real word count
-      payload.text_date  = date
-      payload.word_count = (payload.content_fr || '').split(/\s+/).filter(Boolean).length
+      let payload
+      if (DRY_RUN) {
+        payload = {
+          text_date:  date,
+          theme,
+          word_count: 3,
+          content_fr: 'Texte de test en français.',
+          content_en: 'Test text in English.',
+          content_es: 'Texto de prueba en español.',
+        }
+      } else {
+        const raw     = await callClaude(buildUserPrompt(date, theme, i, dates.length))
+        const jsonStr = extractJSON(raw)
+        payload       = JSON.parse(jsonStr)
+        payload.text_date  = date
+        payload.word_count = (payload.content_fr || '').split(/\s+/).filter(Boolean).length
+      }
 
       const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_texts`, {
         method: 'POST',
