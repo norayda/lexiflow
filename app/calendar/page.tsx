@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import HelpModal from '@/components/HelpModal'
 import type { CalendarDay } from '@/types'
 
 const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -18,6 +19,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true)
   const [viewDate, setViewDate] = useState(new Date())
   const [hasLang, setHasLang] = useState<boolean | null>(null)
+  const [showHelp, setShowHelp] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -117,13 +119,24 @@ export default function CalendarPage() {
         <h1 className="text-xl font-light text-text-primary">
           {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
         </h1>
-        <button
-          onClick={nextMonth}
-          className="w-9 h-9 flex items-center justify-center rounded-xl
-                     bg-surface text-text-secondary hover:text-text-primary transition-colors"
-        >
-          ›
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={nextMonth}
+            className="w-9 h-9 flex items-center justify-center rounded-xl
+                       bg-surface text-text-secondary hover:text-text-primary transition-colors"
+          >
+            ›
+          </button>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl
+                       bg-surface text-text-secondary hover:text-text-primary transition-colors
+                       text-base font-medium"
+            aria-label="Aide"
+          >
+            ?
+          </button>
+        </div>
       </div>
 
       {/* Day labels */}
@@ -206,6 +219,8 @@ export default function CalendarPage() {
           Indisponible
         </span>
       </div>
+
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
       {/* Guard — no learning language set */}
       {!hasLang && (

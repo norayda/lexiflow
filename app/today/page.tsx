@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import ScrollingText from '@/components/ScrollingText'
 import ThemeToggle from '@/components/ThemeToggle'
+import HelpModal from '@/components/HelpModal'
 import type { DailyText, Profile, Language } from '@/types'
 
 function toDateStr(d: Date) {
@@ -20,6 +21,7 @@ export default function TodayPage() {
   const [loading, setLoading] = useState(true)
   const [showTranslation, setShowTranslation] = useState(false)
   const [alreadyDone, setAlreadyDone] = useState(false)   // returning after completion
+  const [showHelp, setShowHelp] = useState(false)
   const router = useRouter()
 
   const today = toDateStr(new Date())
@@ -42,6 +44,11 @@ export default function TodayPage() {
         return
       }
       setProfile(profileData)
+
+      // Show help on first visit ever
+      if (!localStorage.getItem('lexiflow-help-seen')) {
+        setShowHelp(true)
+      }
 
       if (textData) {
         setDailyText(textData)
@@ -193,6 +200,15 @@ export default function TodayPage() {
             {dailyText[nativeContentKey] as string}
           </p>
         </div>
+      )}
+
+      {showHelp && (
+        <HelpModal
+          onClose={() => {
+            localStorage.setItem('lexiflow-help-seen', '1')
+            setShowHelp(false)
+          }}
+        />
       )}
     </div>
   )
