@@ -4,37 +4,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Language } from '@/types'
 
-function EmailConfirmPopup({ onContinue }: { onContinue: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6">
-      <div className="bg-surface rounded-3xl p-8 max-w-sm w-full text-center slide-up border border-surface-raised">
-        <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-5">
-          <span className="text-3xl">📧</span>
-        </div>
-        <h3
-          className="text-xl font-light text-text-primary mb-3"
-          style={{ fontFamily: 'Georgia, serif' }}
-        >
-          Vérifiez votre email
-        </h3>
-        <p className="text-text-secondary text-sm leading-relaxed mb-3">
-          Un lien de confirmation a été envoyé à votre adresse. Cliquez dessus pour
-          activer votre compte <strong className="text-text-primary">LexiFlow</strong>.
-        </p>
-        <p className="text-text-secondary text-xs italic mb-7">
-          Vous pouvez continuer à explorer l&apos;application en attendant.
-        </p>
-        <button
-          onClick={onContinue}
-          className="w-full py-3.5 bg-accent text-white rounded-2xl font-medium
-                     hover:bg-accent-light transition-colors active:scale-95"
-        >
-          Compris, on commence !
-        </button>
-      </div>
-    </div>
-  )
-}
 
 const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
@@ -48,7 +17,6 @@ export default function OnboardingPage() {
   const [learningLang, setLearningLang] = useState<Language | null>(null)
   const [notifTime, setNotifTime] = useState('07:30')
   const [loading, setLoading] = useState(false)
-  const [showEmailPopup, setShowEmailPopup] = useState(false)
   const router = useRouter()
 
   const handleFinish = async () => {
@@ -78,9 +46,8 @@ export default function OnboardingPage() {
         await Notification.requestPermission()
       }
 
-      // Show email confirmation reminder before redirecting
       setLoading(false)
-      setShowEmailPopup(true)
+      router.replace('/today')
     } catch (err) {
       console.error(err)
       setLoading(false)
@@ -88,7 +55,6 @@ export default function OnboardingPage() {
   }
 
   return (
-    <>
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm page-fade">
         {/* Step dots */}
@@ -221,10 +187,5 @@ export default function OnboardingPage() {
         )}
       </div>
     </div>
-
-    {showEmailPopup && (
-      <EmailConfirmPopup onContinue={() => router.replace('/today')} />
-    )}
-    </>
   )
 }
