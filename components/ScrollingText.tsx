@@ -30,6 +30,7 @@ export default function ScrollingText({
   const [completed, setCompleted] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLDivElement>(null)
   const rafRef = useRef<number>(0)
   const lastTimeRef = useRef<number>(0)
   const speedRef = useRef(speed)
@@ -64,16 +65,18 @@ export default function ScrollingText({
       scrollPosRef.current += pxPerSec * delta   // accumulate as float — never read scrollTop back
       container.scrollTop = scrollPosRef.current
 
-      if (
-        scrollPosRef.current + container.clientHeight >=
-        container.scrollHeight - 20
-      ) {
-        setIsPlaying(false)
-        if (!completed) {
-          setCompleted(true)
-          onComplete()
+      const textEl = textRef.current
+      if (textEl) {
+        const textBottom = textEl.getBoundingClientRect().bottom
+        const containerTop = container.getBoundingClientRect().top
+        if (textBottom <= containerTop) {
+          setIsPlaying(false)
+          if (!completed) {
+            setCompleted(true)
+            onComplete()
+          }
+          return
         }
-        return
       }
 
       rafRef.current = requestAnimationFrame(scrollFrame)
@@ -119,7 +122,7 @@ export default function ScrollingText({
       >
         {/* Spacer so first line appears at mid-screen on load */}
         <div className="h-[42vh]" aria-hidden />
-        <div className="reading-text max-w-2xl mx-auto text-text-primary">
+        <div ref={textRef} className="reading-text max-w-2xl mx-auto text-text-primary">
           {sentences.map((sentence, i) => (
             <span
               key={i}
@@ -135,6 +138,9 @@ export default function ScrollingText({
             </span>
           ))}
         </div>
+
+        {/* Spacer so the last line can fully scroll above the viewport before completion fires */}
+        <div className="h-screen" aria-hidden />
 
         {completed && (
           <p className="text-center text-success text-sm mt-6 mb-2">
