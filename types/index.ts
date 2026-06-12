@@ -14,6 +14,8 @@ export interface DailyText {
   id: string
   text_date: string
   theme: string | null
+  theme_en: string | null
+  theme_es: string | null
   word_count: number | null
   content_fr: string
   content_en: string

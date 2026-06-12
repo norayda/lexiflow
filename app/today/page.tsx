@@ -115,6 +115,8 @@ export default function TodayPage() {
   const nativeLang: Language = profile?.native_language ?? 'en'
   const contentKey = `content_${lang}` as keyof DailyText
   const nativeContentKey = `content_${nativeLang}` as keyof DailyText
+  const themeKey = lang === 'fr' ? 'theme' : `theme_${lang}` as keyof DailyText
+  const themeLabel = (dailyText[themeKey] as string | null) ?? dailyText.theme
 
   const dateLabel = new Date(today + 'T12:00:00').toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -148,8 +150,8 @@ export default function TodayPage() {
       <div className="shrink-0 px-5 pt-5 pb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-text-secondary text-xs uppercase tracking-widest">{dateLabel}</p>
-          {dailyText.theme && (
-            <p className="text-text-primary text-base font-medium mt-0.5">{dailyText.theme}</p>
+          {themeLabel && (
+            <p className="text-text-primary text-base font-medium mt-0.5">{themeLabel}</p>
           )}
         </div>
         <ThemeToggle className="shrink-0 mt-0.5" />

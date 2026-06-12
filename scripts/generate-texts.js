@@ -120,6 +120,8 @@ function buildUserPrompt(date, theme, index, total) {
     '{\n' +
     `  "text_date": "${date}",\n` +
     `  "theme": "${theme}",\n` +
+    '  "theme_en": "natural english translation of the theme title (short, 4-8 words)",\n' +
+    '  "theme_es": "traducción natural al español del título del tema (corta, 4-8 palabras)",\n' +
     '  "word_count": <nombre entier>,\n' +
     '  "content_fr": "texte complet en français",\n' +
     '  "content_en": "natural english translation",\n' +

@@ -118,61 +118,44 @@ export default function ProfilePage() {
 
       {/* Settings */}
       <div className="space-y-5">
-        {/* Native language */}
+        {/* Language pickers */}
         <div>
           <label className="block text-text-secondary text-xs uppercase tracking-wider mb-2">
-            Langue maternelle
+            Langues
           </label>
-          <div className="flex gap-2">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() =>
-                  setProfile((p) => p ? { ...p, native_language: l.code } : p)
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[11px] text-text-secondary mb-1.5">Maternelle</p>
+              <select
+                value={profile.native_language ?? 'fr'}
+                onChange={(e) =>
+                  setProfile((p) => p ? { ...p, native_language: e.target.value as Language } : p)
                 }
-                disabled={profile.learning_language === l.code}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl
-                            border-2 transition-all text-sm ${
-                  profile.native_language === l.code
-                    ? 'border-accent bg-accent/10 text-accent'
-                    : profile.learning_language === l.code
-                    ? 'border-surface-raised opacity-30 cursor-not-allowed text-text-secondary'
-                    : 'border-surface-raised text-text-secondary hover:border-accent/40'
-                }`}
+                className="w-full px-3 py-3 bg-surface rounded-2xl text-text-primary
+                           border border-surface-raised focus:border-accent focus:outline-none
+                           appearance-none text-sm"
               >
-                <span className="text-xl">{l.flag}</span>
-                <span>{l.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Learning language */}
-        <div>
-          <label className="block text-text-secondary text-xs uppercase tracking-wider mb-2">
-            Langue apprise
-          </label>
-          <div className="flex gap-2">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() =>
-                  setProfile((p) => p ? { ...p, learning_language: l.code } : p)
+                {LANGUAGES.filter((l) => l.code !== profile.learning_language).map((l) => (
+                  <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <p className="text-[11px] text-text-secondary mb-1.5">Apprise</p>
+              <select
+                value={profile.learning_language ?? 'en'}
+                onChange={(e) =>
+                  setProfile((p) => p ? { ...p, learning_language: e.target.value as Language } : p)
                 }
-                disabled={profile.native_language === l.code}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl
-                            border-2 transition-all text-sm ${
-                  profile.learning_language === l.code
-                    ? 'border-accent bg-accent/10 text-accent'
-                    : profile.native_language === l.code
-                    ? 'border-surface-raised opacity-30 cursor-not-allowed text-text-secondary'
-                    : 'border-surface-raised text-text-secondary hover:border-accent/40'
-                }`}
+                className="w-full px-3 py-3 bg-surface rounded-2xl text-text-primary
+                           border border-surface-raised focus:border-accent focus:outline-none
+                           appearance-none text-sm"
               >
-                <span className="text-xl">{l.flag}</span>
-                <span>{l.label}</span>
-              </button>
-            ))}
+                {LANGUAGES.filter((l) => l.code !== profile.native_language).map((l) => (
+                  <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

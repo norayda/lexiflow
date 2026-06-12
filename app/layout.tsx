@@ -3,6 +3,7 @@ import './globals.css'
 import BottomNav from '@/components/BottomNav'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import NotificationManager from '@/components/NotificationManager'
+import SwipeNavigation from '@/components/SwipeNavigation'
 
 export const metadata: Metadata = {
   title: 'LexiFlow',
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <BottomNav />
           <NotificationManager />
+          <SwipeNavigation />
         </ThemeProvider>
       </body>
     </html>
