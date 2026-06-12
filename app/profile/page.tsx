@@ -170,8 +170,9 @@ export default function ProfilePage() {
             onChange={(e) =>
               setProfile((p) => p ? { ...p, notification_time: e.target.value } : p)
             }
-            className="w-full px-4 py-3 bg-surface rounded-2xl text-text-primary
-                       border border-surface-raised focus:border-accent focus:outline-none"
+            className="w-full px-4 py-3 bg-surface rounded-2xl text-text-primary text-sm
+                       border border-surface-raised focus:border-accent focus:outline-none
+                       appearance-none"
           />
         </div>
 
