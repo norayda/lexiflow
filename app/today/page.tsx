@@ -19,7 +19,7 @@ export default function TodayPage() {
   const [nextDate, setNextDate] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showTranslation, setShowTranslation] = useState(false)
-  const [completed, setCompleted] = useState(false)
+  const [alreadyDone, setAlreadyDone] = useState(false)   // returning after completion
   const router = useRouter()
 
   const today = toDateStr(new Date())
@@ -55,7 +55,7 @@ export default function TodayPage() {
           .eq('user_id', user.id)
           .eq('text_id', textData.id)
           .single()
-        if (existing?.completed) setCompleted(true)
+        if (existing?.completed) setAlreadyDone(true)
       } else {
         const { data: next } = await supabase
           .from('daily_texts')
@@ -80,7 +80,8 @@ export default function TodayPage() {
       .update({ completed: true })
       .eq('user_id', user.id)
       .eq('text_id', dailyText.id)
-    setCompleted(true)
+    // Don't switch screen — ScrollingText shows "✓ Texte terminé" in controls.
+    // alreadyDone only activates on next visit (loaded from DB).
   }
 
   if (authLoading || loading) {
@@ -121,16 +122,15 @@ export default function TodayPage() {
     month: 'long',
   })
 
-  if (completed) {
+  if (alreadyDone) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center pb-24 page-fade">
-        <p className="text-6xl mb-5">🎉</p>
-        <h2 className="text-2xl font-light text-text-primary mb-2">Bravo !</h2>
+        <p className="text-6xl mb-6">🌙</p>
+        <h2 className="text-2xl font-light text-text-primary mb-2">Revenez demain</h2>
         <p className="text-text-secondary mb-8 leading-relaxed">
-          Tu as terminé le texte du jour.<br />
-          Reviens demain pour continuer.
+          Tu as déjà lu le texte du jour.<br />
+          Un nouveau texte t'attend demain.
         </p>
-        <p className="text-4xl mb-8">🌙</p>
         <Link
           href="/calendar"
           className="px-6 py-3 rounded-2xl bg-surface border border-surface-raised

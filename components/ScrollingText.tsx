@@ -69,7 +69,8 @@ export default function ScrollingText({
       if (textEl) {
         const textBottom = textEl.getBoundingClientRect().bottom
         const containerTop = container.getBoundingClientRect().top
-        if (textBottom <= containerTop) {
+        // Fire when last ~120 px of text remains near the top — strongly approaching exit
+        if (textBottom <= containerTop + 120) {
           setIsPlaying(false)
           if (!completed) {
             setCompleted(true)
@@ -139,14 +140,8 @@ export default function ScrollingText({
           ))}
         </div>
 
-        {/* Spacer so the last line can fully scroll above the viewport before completion fires */}
+        {/* Spacer so the last lines can scroll near the top of the viewport */}
         <div className="h-screen" aria-hidden />
-
-        {completed && (
-          <p className="text-center text-success text-sm mt-6 mb-2">
-            ✓ Texte terminé
-          </p>
-        )}
       </div>
 
       {/* Fixed controls – above bottom nav (h-16 = 64px), mirrors container width */}
@@ -157,48 +152,54 @@ export default function ScrollingText({
                    border-t border-surface-raised"
         style={{ bottom: '64px' }}
       >
-        {/* Buttons row */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleReset}
-            className="w-10 h-10 flex items-center justify-center rounded-full
-                       bg-surface text-text-secondary hover:text-text-primary
-                       transition-colors text-lg"
-            title="Retour au début"
-          >
-            ⏮
-          </button>
+        {completed ? (
+          <p className="text-success text-sm py-3">✓ Texte terminé</p>
+        ) : (
+          <>
+            {/* Buttons row */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleReset}
+                className="w-10 h-10 flex items-center justify-center rounded-full
+                           bg-surface text-text-secondary hover:text-text-primary
+                           transition-colors text-lg"
+                title="Retour au début"
+              >
+                ⏮
+              </button>
 
-          <button
-            onClick={() => setIsPlaying((p) => !p)}
-            className={`w-14 h-14 flex items-center justify-center rounded-full
-                        text-2xl text-white transition-all active:scale-95
-                        bg-accent hover:bg-accent-light
-                        ${isPlaying ? 'pulse-active' : ''}`}
-          >
-            {isPlaying ? '⏸' : '▶'}
-          </button>
+              <button
+                onClick={() => setIsPlaying((p) => !p)}
+                className={`w-14 h-14 flex items-center justify-center rounded-full
+                            text-2xl text-white transition-all active:scale-95
+                            bg-accent hover:bg-accent-light
+                            ${isPlaying ? 'pulse-active' : ''}`}
+              >
+                {isPlaying ? '⏸' : '▶'}
+              </button>
 
-          {/* Spacer to balance layout */}
-          <div className="w-10" />
-        </div>
+              {/* Spacer to balance layout */}
+              <div className="w-10" />
+            </div>
 
-        {/* Speed slider */}
-        <div className="flex items-center gap-3 w-full max-w-xs">
-          <span className="text-text-secondary text-[11px] w-8 text-right">Lent</span>
-          <input
-            type="range"
-            min={1}
-            max={100}
-            value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            className="flex-1 h-1 accent-accent cursor-pointer"
-          />
-          <span className="text-text-secondary text-[11px] w-8">Vite</span>
-          <span className="text-accent text-[11px] w-6 text-right font-medium">
-            {speed}
-          </span>
-        </div>
+            {/* Speed slider */}
+            <div className="flex items-center gap-3 w-full max-w-xs">
+              <span className="text-text-secondary text-[11px] w-8 text-right">Lent</span>
+              <input
+                type="range"
+                min={1}
+                max={100}
+                value={speed}
+                onChange={(e) => setSpeed(Number(e.target.value))}
+                className="flex-1 h-1 accent-accent cursor-pointer"
+              />
+              <span className="text-text-secondary text-[11px] w-8">Vite</span>
+              <span className="text-accent text-[11px] w-6 text-right font-medium">
+                {speed}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Phrase popup */}
