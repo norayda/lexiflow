@@ -23,6 +23,8 @@ export default function SwipeNavigation() {
     }
 
     const onEnd = (e: TouchEvent) => {
+      if (document.body.hasAttribute('data-modal-open')) return
+
       const current = pathnameRef.current
       const idx = NAV_PAGES.indexOf(current)
       if (idx === -1) return

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const SLIDES = [
   {
@@ -33,6 +33,12 @@ export default function HelpModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0)
   const slide = SLIDES[step]
   const isLast = step === SLIDES.length - 1
+
+  // Block global swipe navigation while modal is open
+  useEffect(() => {
+    document.body.setAttribute('data-modal-open', '1')
+    return () => document.body.removeAttribute('data-modal-open')
+  }, [])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6">
