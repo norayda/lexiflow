@@ -10,17 +10,17 @@ const SLIDES = [
   {
     icon: '▶',
     title: 'Le défilement automatique',
-    text: 'Appuie sur ▶ pour lancer le défilement. Règle la vitesse avec le curseur. Le texte est marqué "terminé" quand la dernière ligne quitte l\'écran.',
+    text: 'Appuie sur ▶ pour lancer le défilement. Règle la vitesse avec le curseur. Le texte est marqué "terminé" quand la dernière phrase se trouve en haut de l\'écran.',
   },
   {
     icon: '💡',
     title: 'Interagis avec les mots',
-    text: 'Appuie brièvement sur un mot pour voir sa définition. Reste appuyé sur une phrase pour obtenir sa traduction dans ta langue maternelle.',
+    text: 'Maintiens la pression sur une phrase pour voir sa traduction et écouter sa prononciation. Reste appuyé sur un mot pour l\'ajouter à ta boite de vocabulaire et obtenir sa traduction dans ta langue maternelle.',
   },
   {
     icon: '📦',
     title: 'Boîte de vocabulaire',
-    text: 'Depuis la définition d\'un mot, glisse-le vers le bas pour le sauvegarder. Retrouve tous tes mots dans l\'onglet Vocabulaire.',
+    text: 'Depuis le détail d\'un mot, glisse-le vers le bas pour le sauvegarder. Retrouve tous tes mots dans l\'onglet Vocabulaire.',
   },
   {
     icon: '📅',
