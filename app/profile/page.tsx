@@ -23,6 +23,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | 'unsupported'>('unsupported')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showThanks, setShowThanks] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -84,6 +87,20 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.replace('/')
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user) return
+    setDeleting(true)
+    await Promise.all([
+      supabase.from('vocabulary_box').delete().eq('user_id', user.id),
+      supabase.from('reading_progress').delete().eq('user_id', user.id),
+      supabase.from('profiles').delete().eq('id', user.id),
+    ])
+    await supabase.auth.signOut()
+    setDeleting(false)
+    setShowDeleteConfirm(false)
+    setShowThanks(true)
   }
 
   if (authLoading || loading) {
@@ -279,6 +296,71 @@ export default function ProfilePage() {
       >
         Se déconnecter
       </button>
+
+      {/* Delete account */}
+      <button
+        onClick={() => setShowDeleteConfirm(true)}
+        className="mt-2 w-full py-3 rounded-2xl text-red-400/60 text-xs
+                   hover:text-red-400 transition-colors"
+      >
+        Supprimer mon compte
+      </button>
+
+      {/* Confirmation popup */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6">
+          <div className="bg-surface rounded-3xl p-8 w-full max-w-sm border border-surface-raised slide-up text-center">
+            <p className="text-4xl mb-4">🗑️</p>
+            <h3 className="text-lg font-light text-text-primary mb-3"
+                style={{ fontFamily: 'Georgia, serif' }}>
+              Supprimer mon compte ?
+            </h3>
+            <p className="text-text-secondary text-sm leading-relaxed mb-7">
+              Toutes tes données seront effacées — vocabulaire, progression, profil.
+              Cette action est irréversible.
+            </p>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="w-full py-3.5 rounded-2xl bg-red-500 text-white font-medium
+                         hover:bg-red-600 transition-colors active:scale-95 disabled:opacity-50 mb-3"
+            >
+              {deleting ? '…' : 'Oui, supprimer mon compte'}
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deleting}
+              className="w-full py-3 rounded-2xl text-text-secondary text-sm
+                         border border-surface-raised hover:text-text-primary transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Thank you screen */}
+      {showThanks && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center
+                        bg-background px-8 text-center page-fade">
+          <p className="text-6xl mb-6">📖</p>
+          <h2 className="text-2xl font-light text-text-primary mb-4"
+              style={{ fontFamily: 'Georgia, serif' }}>
+            Merci d'avoir utilisé LexiFlow
+          </h2>
+          <p className="text-text-secondary leading-relaxed mb-8">
+            On espère que tu as appris plein de nouveaux mots.<br />
+            Tu es toujours le bienvenu.
+          </p>
+          <button
+            onClick={() => router.replace('/')}
+            className="px-8 py-3 rounded-2xl bg-accent text-white text-sm font-medium
+                       hover:bg-accent-light transition-colors active:scale-95"
+          >
+            Fermer
+          </button>
+        </div>
+      )}
     </div>
   )
 }
