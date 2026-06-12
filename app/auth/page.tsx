@@ -10,6 +10,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [shakeKey, setShakeKey] = useState(0)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -37,6 +38,7 @@ export default function AuthPage() {
       } else {
         setError('Une erreur est survenue, réessaie.')
       }
+      setShakeKey((k) => k + 1)
     } finally {
       setLoading(false)
     }
@@ -70,7 +72,11 @@ export default function AuthPage() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          key={shakeKey}
+          onSubmit={handleSubmit}
+          className={`space-y-4 ${shakeKey > 0 ? 'shake' : ''}`}
+        >
           <input
             type="email"
             placeholder="Email"
