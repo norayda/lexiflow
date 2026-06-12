@@ -29,7 +29,14 @@ export default function AuthPage() {
         router.replace('/onboarding')
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('already registered') || msg.includes('already exists')) {
+        setError('Un compte existe déjà avec cet email.')
+      } else if (msg.includes('Invalid login') || msg.includes('invalid credentials')) {
+        setError('Email ou mot de passe incorrect.')
+      } else {
+        setError('Une erreur est survenue, réessaie.')
+      }
     } finally {
       setLoading(false)
     }
