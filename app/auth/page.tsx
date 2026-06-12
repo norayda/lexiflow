@@ -8,6 +8,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -74,18 +75,29 @@ export default function AuthPage() {
                        placeholder:text-text-secondary border border-surface-raised
                        focus:border-accent focus:outline-none transition-colors"
           />
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            autoComplete={isLogin ? 'current-password' : 'new-password'}
-            className="w-full px-4 py-3.5 bg-surface rounded-2xl text-text-primary
-                       placeholder:text-text-secondary border border-surface-raised
-                       focus:border-accent focus:outline-none transition-colors"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              className="w-full px-4 py-3.5 pr-12 bg-surface rounded-2xl text-text-primary
+                         placeholder:text-text-secondary border border-surface-raised
+                         focus:border-accent focus:outline-none transition-colors"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary
+                         hover:text-text-primary transition-colors px-1 py-1 text-lg leading-none"
+              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
 
           {error && (
             <p className="text-red-400 text-sm text-center px-2">{error}</p>
